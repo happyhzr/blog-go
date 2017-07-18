@@ -2,7 +2,9 @@ package busniess
 
 import (
 	"errors"
+	"time"
 
+	"github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 
 	"github.com/insisthzr/blog-back/model"
@@ -43,7 +45,10 @@ type SignupOut struct {
 	UserOut
 }
 
-func Signup(in *SignupIn) (*SignupOut, error) {
+func Signup(in *SignupIn) (o *SignupOut, e error) {
+	defer func() {
+		logrus.WithFields(logrus.Fields{"in": in, "out": o, "error": e}).Info("sign up")
+	}()
 	_, err := model.GetUserByEmail(in.Email)
 	if err != nil && err != mgo.ErrNotFound {
 		panic(err)
@@ -54,9 +59,10 @@ func Signup(in *SignupIn) (*SignupOut, error) {
 
 	salt := util.GenSalt()
 	user := &model.User{
-		Email:    in.Email,
-		Salt:     salt,
-		Password: util.Hash(in.Password, salt),
+		Email:     in.Email,
+		Salt:      salt,
+		Password:  util.Hash(in.Password, salt),
+		CreatedAt: time.Now().Unix(),
 	}
 	err = user.Save()
 	if err != nil {

@@ -10,4 +10,5 @@ var (
 	DBName   = "blog"
 
 	FilePath = "/var/www/blog/file/"
+	LogPath  = "/mnt/log/blog"
 )

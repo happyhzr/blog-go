@@ -1,11 +1,11 @@
 package model
 
 import (
+	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/insisthzr/blog-back/conf"
 	"github.com/insisthzr/blog-back/db"
-	"gopkg.in/mgo.v2"
 )
 
 type Archive struct {

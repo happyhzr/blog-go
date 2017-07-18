@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/Sirupsen/logrus"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 
@@ -46,6 +47,7 @@ func UploadFile(c echo.Context) error {
 		},
 	}
 	out := busniess.CreateFile(in)
+	logrus.WithFields(logrus.Fields{"out": out}).Infoln("UploadFile")
 	return c.JSON(200, JSON{"file": out})
 }
 

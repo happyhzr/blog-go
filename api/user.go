@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
 	"github.com/insisthzr/blog-back/busniess"
@@ -15,6 +16,7 @@ func Login(c echo.Context) error {
 	}
 	in := &busniess.LoginIn{UserIn: *userIn}
 	out, err := busniess.Login(in)
+	logrus.WithFields(logrus.Fields{"out": out, "error": err}).Infoln("Login")
 	if err != nil {
 		return err
 	}
@@ -30,10 +32,9 @@ func Signup(c echo.Context) error {
 	}
 	in := &busniess.SignupIn{UserIn: *userIn}
 	out, err := busniess.Signup(in)
+	logrus.WithFields(logrus.Fields{"out": out, "error": err}).Infoln("Signup")
 	if err != nil {
 		return err
 	}
-	return c.JSON(200, JSON{
-		"user": out,
-	})
+	return c.JSON(200, JSON{"user": out})
 }

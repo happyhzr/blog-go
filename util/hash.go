@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func Hash(password, salt string) string {
+func Hash(password string, salt string) string {
 	return fmt.Sprintf("%x", sha1.Sum([]byte(password+salt)))
 }
 

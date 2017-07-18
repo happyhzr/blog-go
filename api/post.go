@@ -3,6 +3,7 @@ package api
 import (
 	"strconv"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 
@@ -20,6 +21,7 @@ func CreatePost(c echo.Context) error {
 	postIn.CreatedBy = userID
 	in := &busniess.CreatePostIn{PostIn: *postIn}
 	out := busniess.CreatePost(in)
+	logrus.WithFields(logrus.Fields{"out": out}).Infoln("CreatePost")
 	return c.JSON(200, JSON{"post": out})
 }
 
@@ -34,15 +36,13 @@ func ListPosts(c echo.Context) error {
 			Limit: limit,
 		},
 	}
-	posts := busniess.ListPosts(in)
-	return c.JSON(200, JSON{
-		"posts": posts,
-	})
+	out := busniess.ListPosts(in)
+	logrus.WithFields(logrus.Fields{"out": out}).Infoln("ListPosts")
+	return c.JSON(200, JSON{"posts": out})
 }
 
 func CountPosts(c echo.Context) error {
-	count := busniess.CountPosts()
-	return c.JSON(200, JSON{
-		"count": count,
-	})
+	out := busniess.CountPosts()
+	logrus.WithFields(logrus.Fields{"out": out}).Infoln("CountPosts")
+	return c.JSON(200, JSON{"count": out})
 }
