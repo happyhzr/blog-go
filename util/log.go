@@ -42,7 +42,7 @@ func AutoRotateLog() {
 		hourLeft := 24 - 1 - t.Hour()
 		minLeft := 60 - 1 - t.Minute()
 		secLeft := 60 - t.Second()
-		ts := 60*(24*hourLeft+minLeft) + secLeft
+		ts := 60*(60*hourLeft+minLeft) + secLeft
 		time.Sleep(time.Duration(ts) * time.Second)
 	}
 }
