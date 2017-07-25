@@ -1,1 +1,1 @@
-A Toy Blog
+[A Toy Blog](https://blog.thisishzr.me)

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 
 	"github.com/insisthzr/blog-back/model"
@@ -46,9 +45,6 @@ type SignupOut struct {
 }
 
 func Signup(in *SignupIn) (o *SignupOut, e error) {
-	defer func() {
-		logrus.WithFields(logrus.Fields{"in": in, "out": o, "error": e}).Info("sign up")
-	}()
 	_, err := model.GetUserByEmail(in.Email)
 	if err != nil && err != mgo.ErrNotFound {
 		panic(err)
