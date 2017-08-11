@@ -33,11 +33,11 @@ func newFileOut(file *model.File) *FileOut {
 }
 
 type CreateFileIn struct {
-	FileIn
+	*FileIn
 }
 
 type CreateFileOut struct {
-	FileOut
+	*FileOut
 }
 
 func CreateFile(in *CreateFileIn) *CreateFileOut {
@@ -52,12 +52,12 @@ func CreateFile(in *CreateFileIn) *CreateFileOut {
 	if err != nil {
 		panic(err)
 	}
-	out := &CreateFileOut{FileOut: *newFileOut(file)}
+	out := &CreateFileOut{FileOut: newFileOut(file)}
 	return out
 }
 
 type ListFilesOut struct {
-	FileOut
+	*FileOut
 }
 
 func ListFiles() []*ListFilesOut {
@@ -67,7 +67,7 @@ func ListFiles() []*ListFilesOut {
 	}
 	outs := make([]*ListFilesOut, 0, len(files))
 	for _, file := range files {
-		out := &ListFilesOut{FileOut: *newFileOut(file)}
+		out := &ListFilesOut{FileOut: newFileOut(file)}
 		outs = append(outs, out)
 	}
 	return outs

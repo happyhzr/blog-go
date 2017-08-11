@@ -16,7 +16,10 @@ func Init() *echo.Echo {
 	// Set Bundle MiddleWare
 	e.Use(middleware.Logger())
 	e.Use(middleware.Gzip())
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"localhost:443"},
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+	}))
 
 	// Set Custom MiddleWare
 

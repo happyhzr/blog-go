@@ -14,7 +14,7 @@ func Login(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	in := &busniess.LoginIn{UserIn: *userIn}
+	in := &busniess.LoginIn{UserIn: userIn}
 	out, err := busniess.Login(in)
 	logrus.WithFields(logrus.Fields{"out": out, "error": err}).Infoln("Login")
 	if err != nil {
@@ -30,7 +30,7 @@ func Signup(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	in := &busniess.SignupIn{UserIn: *userIn}
+	in := &busniess.SignupIn{UserIn: userIn}
 	out, err := busniess.Signup(in)
 	logrus.WithFields(logrus.Fields{"out": out, "error": err}).Infoln("Signup")
 	if err != nil {

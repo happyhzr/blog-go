@@ -20,7 +20,7 @@ var (
 )
 
 func RotateLogNX(path string) {
-	outputNew, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	outputNew, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	CheckError(err)
 	logrus.SetOutput(outputNew)
 	if output != nil {

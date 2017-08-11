@@ -19,7 +19,7 @@ func CreatePost(c echo.Context) error {
 		return err
 	}
 	postIn.CreatedBy = userID
-	in := &busniess.CreatePostIn{PostIn: *postIn}
+	in := &busniess.CreatePostIn{PostIn: postIn}
 	out := busniess.CreatePost(in)
 	logrus.WithFields(logrus.Fields{"out": out}).Infoln("CreatePost")
 	return c.JSON(200, JSON{"post": out})
@@ -31,7 +31,7 @@ func ListPosts(c echo.Context) error {
 	skip, _ := strconv.Atoi(skipStr)
 	limit, _ := strconv.Atoi(limitStr)
 	in := &busniess.ListPostsIn{
-		Range: busniess.SkipLimit{
+		Range: &busniess.SkipLimit{
 			Skip:  skip,
 			Limit: limit,
 		},

@@ -6,9 +6,9 @@ import (
 	"github.com/insisthzr/blog-back/model"
 )
 
-func AddPostToArchive(year int, month int, postID bson.ObjectId) {
+func AddPostToArchive(year int, month int, post *model.Post) {
 	selector := bson.M{"year": year, "month": month}
-	update := bson.M{"$push": bson.M{"posts": postID}}
+	update := bson.M{"$push": bson.M{"posts": post}}
 	_, err := model.UpsertArchive(selector, update)
 	if err != nil {
 		panic(err)
@@ -31,7 +31,7 @@ func newArchiveOut(archive *model.Archive) *ArchiveOut {
 }
 
 type ListArchivesOut struct {
-	ArchiveOut
+	*ArchiveOut
 }
 
 func ListArchives() []*ListArchivesOut {
@@ -41,7 +41,7 @@ func ListArchives() []*ListArchivesOut {
 	}
 	outs := make([]*ListArchivesOut, 0, len(archives))
 	for _, archive := range archives {
-		out := &ListArchivesOut{ArchiveOut: *newArchiveOut(archive)}
+		out := &ListArchivesOut{ArchiveOut: newArchiveOut(archive)}
 		outs = append(outs, out)
 	}
 	return outs

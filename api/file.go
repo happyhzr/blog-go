@@ -39,7 +39,7 @@ func UploadFile(c echo.Context) error {
 		return err
 	}
 	in := &busniess.CreateFileIn{
-		FileIn: busniess.FileIn{
+		FileIn: &busniess.FileIn{
 			Name:      file.Filename,
 			Path:      path,
 			Size:      written,

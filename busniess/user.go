@@ -37,11 +37,11 @@ func newUserOut(user *model.User) *UserOut {
 }
 
 type SignupIn struct {
-	UserIn
+	*UserIn
 }
 
 type SignupOut struct {
-	UserOut
+	*UserOut
 }
 
 func Signup(in *SignupIn) (o *SignupOut, e error) {
@@ -65,17 +65,17 @@ func Signup(in *SignupIn) (o *SignupOut, e error) {
 		panic(err)
 	}
 	out := &SignupOut{
-		UserOut: *newUserOut(user),
+		UserOut: newUserOut(user),
 	}
 	return out, nil
 }
 
 type LoginIn struct {
-	UserIn
+	*UserIn
 }
 
 type LoginOut struct {
-	UserOut
+	*UserOut
 }
 
 func Login(in *LoginIn) (*LoginOut, error) {
@@ -88,7 +88,7 @@ func Login(in *LoginIn) (*LoginOut, error) {
 		return nil, errIncorrectPassword
 	}
 	out := &LoginOut{
-		UserOut: *newUserOut(user),
+		UserOut: newUserOut(user),
 	}
 	return out, nil
 }

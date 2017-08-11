@@ -44,11 +44,11 @@ func newPostOut(post *model.Post) *PostOut {
 }
 
 type CreatePostIn struct {
-	PostIn
+	*PostIn
 }
 
 type CreatePostOut struct {
-	PostOut
+	*PostOut
 }
 
 func CreatePost(in *CreatePostIn) *CreatePostOut {
@@ -63,13 +63,13 @@ func CreatePost(in *CreatePostIn) *CreatePostOut {
 		panic(err)
 	}
 	t := time.Unix(post.CreatedAt, 0)
-	AddPostToArchive(t.Year(), int(t.Month()), post.ID)
-	out := &CreatePostOut{PostOut: *newPostOut(post)}
+	AddPostToArchive(t.Year(), int(t.Month()), post)
+	out := &CreatePostOut{PostOut: newPostOut(post)}
 	return out
 }
 
 type ListPostsIn struct {
-	Range SkipLimit
+	Range *SkipLimit
 }
 
 type ListPostsOut struct {
@@ -77,7 +77,8 @@ type ListPostsOut struct {
 }
 
 func ListPosts(in *ListPostsIn) []*ListPostsOut {
-	posts, err := model.ListPostsWithRange(nil, in.Range.Skip, in.Range.Limit)
+	config := &model.QueryConfig{Skip: in.Range.Skip, Limit: in.Range.Limit}
+	posts, err := model.ListPostsWithConfig(nil, config)
 	if err != nil {
 		panic(err)
 	}

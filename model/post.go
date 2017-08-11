@@ -39,11 +39,12 @@ func ListPosts(query bson.M) ([]*Post, error) {
 	return posts, err
 }
 
-func ListPostsWithRange(query bson.M, skip int, limit int) ([]*Post, error) {
+func ListPostsWithConfig(query bson.M, config *QueryConfig) ([]*Post, error) {
 	sess := db.CopySess()
 	defer sess.Close()
 	posts := []*Post{}
-	err := sess.DB(conf.DBName).C(cPost).Find(query).Skip(skip).Limit(limit).Sort("-_id").All(&posts)
+	err := sess.DB(conf.DBName).C(cPost).Find(query).
+		Skip(config.Skip).Limit(config.Limit).Sort("-_id").All(&posts)
 	return posts, err
 }
 

@@ -6,3 +6,8 @@ const (
 	cArchive = "archives"
 	cFile    = "files"
 )
+
+type QueryConfig struct {
+	Skip  int
+	Limit int
+}
