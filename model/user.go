@@ -1,42 +1,39 @@
 package model
 
 import (
-	"gopkg.in/mgo.v2/bson"
-
-	"github.com/insisthzr/blog-back/conf"
-	"github.com/insisthzr/blog-back/db"
+	"github.com/insisthzr/blog-back/service/mysql"
+	"github.com/insisthzr/blog-back/util"
 )
 
 type User struct {
-	ID        bson.ObjectId `bson:"_id"`
-	Email     string        `bson:"email"`
-	Password  string        `bson:"password"`
-	Salt      string        `bson:"salt"`
-	CreatedAt int64         `bson:"created_at"`
+	Id       int64
+	Username string
+	Password string
 }
 
-func (u *User) Save() error {
-	sess := db.CopySess()
-	defer sess.Close()
-	u.ID = bson.NewObjectId()
-	err := sess.DB(conf.DBName).C(cUser).Insert(u)
-	return err
+func (u *User) Insert() {
+	db := mysql.GetDb()
+	stmt, err := db.Prepare("INSERT user SET username=?,password=?")
+	util.CheckError(err)
+	result, err := stmt.Exec(u.Username, u.Password)
+	util.CheckError(err)
+	id, err := result.LastInsertId()
+	util.CheckError(err)
+	u.Id = id
 }
 
-func GetUser(query bson.M) (*User, error) {
-	sess := db.CopySess()
-	defer sess.Close()
+func GetUserByUsername(username string) *User {
+	db := mysql.GetDb()
+	stmt, err := db.Prepare("SELECT * FROM user WHERE username=? LIMIT 1")
+	util.CheckError(err)
+	rows, err := stmt.Query(username)
+	util.CheckError(err)
+	ok := rows.Next()
+	if !ok {
+		return nil
+	}
 	user := &User{}
-	err := sess.DB(conf.DBName).C(cUser).Find(query).One(user)
-	return user, err
-}
-
-func GetUserByEmail(email string) (*User, error) {
-	query := bson.M{"email": email}
-	return GetUser(query)
-}
-
-func GetUserByID(id bson.ObjectId) (*User, error) {
-	query := bson.M{"_id": id}
-	return GetUser(query)
+	err = rows.Scan(&user.Id, &user.Username, &user.Password)
+	util.CheckError(err)
+	return user
 }

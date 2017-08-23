@@ -1,26 +1,22 @@
 package util
 
 import (
-	"fmt"
 	"os"
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/insisthzr/blog-back/conf"
 )
 
 const (
-	layout       = "2006-01-02 15:04:05 +0800 CST"
-	layoutPrefix = "2006-01-02"
+	layout = "2006-01-02"
 )
 
 var (
-	layoutPrefixLen = len(layoutPrefix)
-	output          *os.File
+	output *os.File
 )
 
-func RotateLogNX(path string) {
-	outputNew, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+func Rotate(name string) {
+	outputNew, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	CheckError(err)
 	logrus.SetOutput(outputNew)
 	if output != nil {
@@ -28,16 +24,15 @@ func RotateLogNX(path string) {
 		CheckError(err)
 	}
 	output = outputNew
-	logrus.Infoln("RotateLogNX")
+	logrus.Infoln("rotate log")
 }
 
-//TODO HOW TO LOCK
-func AutoRotateLog() {
+func RunRotate() {
 	for {
 		t := time.Now()
-		name := t.Format(layout)[:layoutPrefixLen]
-		path := fmt.Sprintf("%s/%s.log", conf.LogPath, name)
-		RotateLogNX(path)
+		//name := "" // t.Format(layout)[:layoutPrefixLen]
+		//path := "" // fmt.Sprintf("%s/%s.log", conf.LogPath, name)
+		Rotate("")
 
 		hourLeft := 24 - 1 - t.Hour()
 		minLeft := 60 - 1 - t.Minute()

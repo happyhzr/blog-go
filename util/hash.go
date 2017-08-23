@@ -6,12 +6,16 @@ import (
 	"fmt"
 )
 
+var (
+	SaltLen = 16
+)
+
 func Hash(password string, salt string) string {
 	return fmt.Sprintf("%x", sha1.Sum([]byte(password+salt)))
 }
 
 func GenSalt() string {
-	b := make([]byte, 16)
+	b := make([]byte, SaltLen)
 	_, err := rand.Read(b)
 	if err != nil {
 		panic(err)

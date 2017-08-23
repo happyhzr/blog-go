@@ -1,8 +1,9 @@
-#!/usr/local/bin/python3.6
+#!/usr/local/bin/python3
 from fabric.api import run, env, local, cd, put
 
 env.hosts = ['47.52.69.7']
 env.user = 'root'
+
 
 def dev():
     local("GOOS=linux go build")

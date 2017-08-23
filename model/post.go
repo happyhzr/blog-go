@@ -1,55 +1,41 @@
 package model
 
 import (
-	"gopkg.in/mgo.v2/bson"
-
-	"github.com/insisthzr/blog-back/conf"
-	"github.com/insisthzr/blog-back/db"
+	"github.com/insisthzr/blog-back/service/mysql"
+	"github.com/insisthzr/blog-back/util"
 )
 
 type Post struct {
-	ID        bson.ObjectId `bson:"_id"`
-	Title     string        `bson:"title"`
-	Body      string        `bson:"body"`
-	CreatedBy bson.ObjectId `bson:"created_by,omitempty"`
-	CreatedAt int64         `bson:"created_at"`
+	Id        int64
+	Title     string
+	Content   string
+	CreatedAt int64
+	UpdatedAt int64
 }
 
-func (p *Post) Save() error {
-	sess := db.CopySess()
-	defer sess.Close()
-	p.ID = bson.NewObjectId()
-	err := sess.DB(conf.DBName).C(cPost).Insert(p)
-	return err
+func (p *Post) Insert() {
+	db := mysql.GetDb()
+	stmt, err := db.Prepare("INSERT post SET title=?,content=?,created_at=?,updated_at=?")
+	util.CheckError(err)
+	result, err := stmt.Exec(p.Title, p.Content, p.CreatedAt, p.UpdatedAt)
+	util.CheckError(err)
+	id, err := result.LastInsertId()
+	util.CheckError(err)
+	p.Id = id
 }
 
-func GetPost(query bson.M) (*Post, error) {
-	sess := db.CopySess()
-	defer sess.Close()
-	post := &Post{}
-	err := sess.DB(conf.DBName).C(cPost).Find(query).One(post)
-	return post, err
-}
-
-func ListPosts(query bson.M) ([]*Post, error) {
-	sess := db.CopySess()
-	defer sess.Close()
+func ListPosts() []*Post {
+	db := mysql.GetDb()
+	stmt, err := db.Prepare("SELECT * FROM post ORDER BY updated_at DESC")
+	util.CheckError(err)
+	rows, err := stmt.Query()
+	util.CheckError(err)
 	posts := []*Post{}
-	err := sess.DB(conf.DBName).C(cPost).Find(query).Sort("-_id").All(posts)
-	return posts, err
-}
-
-func ListPostsWithConfig(query bson.M, config *QueryConfig) ([]*Post, error) {
-	sess := db.CopySess()
-	defer sess.Close()
-	posts := []*Post{}
-	err := sess.DB(conf.DBName).C(cPost).Find(query).
-		Skip(config.Skip).Limit(config.Limit).Sort("-_id").All(&posts)
-	return posts, err
-}
-
-func CountPosts(query bson.M) (int, error) {
-	sess := db.CopySess()
-	defer sess.Close()
-	return sess.DB(conf.DBName).C(cPost).Find(query).Count()
+	for rows.Next() {
+		post := &Post{}
+		err = rows.Scan(&post.Id, &post.Title, &post.Content, &post.CreatedAt, &post.UpdatedAt)
+		util.CheckError(err)
+		posts = append(posts, post)
+	}
+	return posts
 }
