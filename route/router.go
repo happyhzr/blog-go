@@ -15,20 +15,15 @@ func Init() *echo.Echo {
 
 	// Set Bundle MiddleWare
 	e.Use(middleware.Logger())
-	e.Use(middleware.Gzip())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"localhost:443"},
-		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
-	}))
-
 	// Set Custom MiddleWare
+	a := e.Group("/api")
 
 	// Routes
-	e.GET("/ping", func(c echo.Context) error {
+	a.GET("/ping", func(c echo.Context) error {
 		return c.String(200, "pong")
 	})
 
-	v1 := e.Group("/api/v1")
+	v1 := a.Group("/v1")
 	{
 		user := v1.Group("/users")
 		{
