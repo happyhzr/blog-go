@@ -1,1 +1,0 @@
-[A Toy Blog](https://blog.thisishzr.me)

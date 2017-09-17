@@ -1,20 +1,17 @@
-CREATE DATABASE IF NOT EXISTS blog;
-USE blog;
+DROP TABLE IF EXISTS users;
 
-DROP TABLE IF EXISTS user;
-CREATE TABLE user(
-	id bigint NOT NULL auto_increment,
-    username varchar(30),
-    password varchar(30),
-    PRIMARY KEY (id)
+CREATE TABLE users(
+    id serial4 primary key,
+    name text,
+    password text
 );
 
-DROP TABLE IF EXISTS post;
-CREATE TABLE post(
-	id bigint NOT NULL auto_increment,
-    title varchar(30),
+DROP TABLE IF EXISTS posts;
+
+CREATE TABLE posts(
+    id serial4 primary key,
+    title text,
     content text,
-    created_at bigint,
-    updated_at bigint,
-    PRIMARY KEY(id)
+    created_at int8,
+    created_by int4
 );

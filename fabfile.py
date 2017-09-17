@@ -6,11 +6,12 @@ env.user = 'root'
 
 
 def dev():
-    local("GOOS=linux go build")
-    with cd('/mnt/code/blog'):
-        put('blog-back', 'blog_new')
-        run('supervisorctl stop blog')
-        run('mv blog_new blog')
-        run('chmod +x blog')
-        run('supervisorctl start blog')
-    local('rm -rf blog-back')
+    name = 'blog-back'
+    local('GOOS=linux go build')
+    local('gzip blog-back')
+    with cd('/mnt/code/{0}'.format(name)):
+        put('{0}.gz'.format(name), '{0}.gz'.format(name))
+        run('gzip -df {0}.gz'.format(name))
+        run('chmod +x {0}'.format(name))
+        run('supervisorctl restart {0}'.format(name))
+    local('rm {0}.gz'.format(name))
