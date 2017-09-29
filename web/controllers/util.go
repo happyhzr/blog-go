@@ -5,11 +5,6 @@ import (
 	"github.com/insisthzr/blog-back/config"
 )
 
-type offsetLimit struct {
-	Offset int `form:"offset"`
-	Limit  int `form:"limit"`
-}
-
 func getIDFromJWT(token *jwt.Token) int {
 	id := int(token.Claims.(jwt.MapClaims)["id"].(float64))
 	return id

@@ -1,5 +1,9 @@
 package config
 
+import (
+	"os"
+)
+
 type Config struct {
 	Http Http `json:"http"`
 	Db   Db   `json:"db"`
@@ -25,7 +29,7 @@ var (
 			Addr: ":20001",
 		},
 		Db: Db{
-			Dsn: "user=root port=5433 dbname=blog",
+			Dsn: "root:" + os.Getenv("MYSQL_PASS") + "@/blog?parseTime=true",
 		},
 		Jwt: Jwt{
 			Secret: "keyboard cat",

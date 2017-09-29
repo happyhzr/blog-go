@@ -4,42 +4,36 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 
-	"github.com/insisthzr/blog-back/models"
+	"github.com/insisthzr/blog-back/services"
 )
 
 func Signup(c *gin.Context) {
-	user := &models.User{}
+	user := &services.User{}
 	err := c.Bind(user)
 	if err != nil {
 		c.JSON(400, gin.H{"message": err.Error()})
 		return
 	}
-	err = user.Insert()
+	err = user.Signup()
 	if err != nil {
 		c.JSON(400, gin.H{"message": err.Error()})
 		return
 	}
-	user.Password = ""
 	c.JSON(200, gin.H{"user": user})
 }
 
 func Login(c *gin.Context) {
-	in := &models.User{}
-	err := c.Bind(in)
+	user := &services.User{}
+	err := c.Bind(user)
 	if err != nil {
 		c.JSON(400, gin.H{"message": err.Error()})
 		return
 	}
-	user, err := models.GetUserByName(in.Name)
+	err = user.Login()
 	if err != nil {
-		c.JSON(200, gin.H{"message": "user not exist"})
+		c.JSON(200, gin.H{"message": err.Error()})
 		return
 	}
-	if in.Password != user.Password {
-		c.JSON(200, gin.H{"message": "password error"})
-		return
-	}
-	user.Password = ""
 	token := newJwtToken(jwt.MapClaims{"id": user.ID})
 	c.JSON(200, gin.H{"user": user, "token": token})
 }

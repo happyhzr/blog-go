@@ -1,18 +1,16 @@
 package main
 
 import (
-	"github.com/Sirupsen/logrus"
-
 	"github.com/insisthzr/blog-back/models"
+	"github.com/insisthzr/blog-back/utils"
 	"github.com/insisthzr/blog-back/web"
 )
 
 func main() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetLevel(logrus.DebugLevel)
-	logrus.Info("logger started")
-	logrus.Info("postgres started")
+	utils.InitLogger()
+	utils.Sugar.Info("logger started")
 	models.Start()
-	logrus.Info("web starting")
+	utils.Sugar.Info("mysql started")
+	utils.Sugar.Info("web starting")
 	web.Start()
 }

@@ -13,7 +13,8 @@ func JwtAuth(secret string) gin.HandlerFunc {
 			return b, nil
 		})
 		if err != nil {
-			c.AbortWithError(401, err)
+			c.AbortWithStatusJSON(401, gin.H{"message": "unauth"})
+			return
 		}
 		m := token.Claims.(jwt.MapClaims)
 		c.Set("jwtMap", m)

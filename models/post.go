@@ -1,69 +1,118 @@
 package models
 
-import "time"
+import (
+	"time"
 
-type Post struct {
-	ID        int    `json:"id"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	CreatedAt int64  `json:"created_at"`
-	CreatedBy *User  `json:"created_by"`
+	"database/sql"
+
+	"github.com/insisthzr/blog-back/utils"
+)
+
+type PostSelector struct {
+	utils.LimitOffset
+	CID int64 `form:"cid"`
 }
 
-func (p *Post) Insert() error {
-	if p.CreatedAt == 0 {
-		p.CreatedAt = time.Now().Unix()
+type Post struct {
+	ID        int64
+	Title     string
+	Content   string
+	CreatedAt time.Time
+	Author    User
+	Category  Category
+}
+
+func (p *Post) Insert(tx *sql.Tx) error {
+	query := "INSERT INTO post(title, content, created_at, author_id, category_id) VALUES(?, ?, ?, ?, ?)"
+	res, err := tx.Exec(query, p.Title, p.Content, p.CreatedAt, p.Author.ID, p.Category.ID)
+	if err != nil {
+		return err
 	}
-	db := getDb()
-	query := "INSERT INTO posts(title, content, created_at, created_by) VALUES($1, $2, $3, $4) RETURNING id"
-	err := db.QueryRow(query, p.Title, p.Content, p.CreatedAt, p.CreatedBy.ID).Scan(&p.ID)
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+	p.ID = id
+	return nil
+}
+
+func (p *Post) Update(tx *sql.Tx, id int64) error {
+	query := "UPDATE post SET title = ?, content = ? WHERE id = ?"
+	_, err := tx.Exec(query, p.Title, p.Content, id)
 	return err
 }
 
-func listPosts(query string, args ...interface{}) ([]*Post, error) {
+func getPost(tx *sql.Tx, query string, args ...interface{}) (*Post, error) {
+	p := &Post{}
+	authorName := sql.NullString{}
+	categoryName := sql.NullString{}
+	err := tx.QueryRow(query, args...).Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.Author.ID, &authorName, &p.Category.ID, &categoryName)
+	if err != nil {
+		return nil, err
+	}
+	p.Author.Name = authorName.String
+	p.Category.Name = categoryName.String
+	return p, err
+}
+
+func GetPost(tx *sql.Tx, id int64) (*Post, error) {
+	query := `SELECT post.id, title, content, created_at, author_id, user.name, category_id, category.name 
+	 FROM post
+	 LEFT OUTER JOIN user ON author_id = user.id 
+	 LEFT OUTER JOIN category ON category_id = category.id
+     WHERE post.id = ?`
+	return getPost(tx, query, id)
+}
+
+func listPosts(tx *sql.Tx, query string, args ...interface{}) ([]*Post, error) {
 	posts := []*Post{}
-	db := getDb()
-	rows, err := db.Query(query, args...)
+	rows, err := tx.Query(query, args...)
 	if err != nil {
 		return posts, err
 	}
 	defer rows.Close()
+
 	for rows.Next() {
-		post := &Post{CreatedBy: &User{}}
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.CreatedBy.ID, &post.CreatedBy.Name)
+		p := &Post{}
+		authorName := sql.NullString{}
+		categoryName := sql.NullString{}
+		err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.Author.ID, &authorName, &p.Category.ID, &categoryName)
 		if err != nil {
-			return posts, err
+			break
 		}
-		posts = append(posts, post)
+		p.Author.Name = authorName.String
+		p.Category.Name = categoryName.String
+		posts = append(posts, p)
 	}
 	err = rows.Err()
-	return posts, err
-}
-
-func ListPosts(offset int, limit int) ([]*Post, error) {
-	query := `SELECT posts.id, title, content, created_at, users.id, users.name
-	 FROM posts LEFT OUTER JOIN users ON posts.created_by = users.id 
-	 ORDER BY posts.id DESC OFFSET $1`
-	var posts []*Post
-	var err error
-	if limit == -1 {
-		posts, err = listPosts(query, offset)
-	} else {
-		query += " LIMIT $2"
-		posts, err = listPosts(query, offset, limit)
+	if err != nil {
+		return posts, err
 	}
 	return posts, err
 }
 
-func countPost(query string, args ...interface{}) (int, error) {
-	count := 0
-	db := getDb()
-	err := db.QueryRow(query, args...).Scan(&count)
-	return count, err
+func ListPosts(tx *sql.Tx, s PostSelector) ([]*Post, error) {
+	ps := []*Post{}
+	var err error
+	if s.CID == 0 {
+		query := `SELECT post.id, title, content, created_at, author_id, user.name, category_id, category.name FROM post
+		 LEFT OUTER JOIN user ON author_id = user.id 
+		 LEFT OUTER JOIN category ON category_id = category.id
+		 ORDER BY post.id DESC LIMIT ? OFFSET ?`
+		ps, err = listPosts(tx, query, s.Limit, s.Offset)
+	} else {
+		query := `SELECT post.id, title, content, created_at, author_id, user.name, category_id, category.name FROM post
+		 LEFT OUTER JOIN user ON author_id = user.id 
+		 LEFT OUTER JOIN category ON category_id = category.id
+		 WHERE post.category_id = ?
+		 ORDER BY post.id DESC LIMIT ? OFFSET ?`
+		ps, err = listPosts(tx, query, s.CID, s.Limit, s.Offset)
+	}
+	return ps, err
 }
 
-func CountPost() (int, error) {
-	query := "SELECT COUNT(*) FROM posts"
-	count, err := countPost(query)
-	return count, err
+func DeletePost(tx *sql.Tx, id int64) error {
+	query := "DELETE from post WHERE id = ?"
+	_, err := tx.Exec(query, id)
+	return err
 }
