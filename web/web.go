@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/insisthzr/blog-back/config"
@@ -17,9 +18,10 @@ import (
 func Start() {
 	//authMW := middlewares.JwtAuth(config.DefaultConfig.Jwt.Secret)
 
-	router := gin.Default()
+	r := gin.Default()
+	r.Use(cors.Default())
 
-	api := router.Group("/api")
+	api := r.Group("/api")
 
 	v1 := api.Group("/v1")
 	{
@@ -58,7 +60,7 @@ func Start() {
 
 	srv := &http.Server{
 		Addr:    config.DefaultConfig.Http.Addr,
-		Handler: router,
+		Handler: r,
 	}
 
 	go func() {

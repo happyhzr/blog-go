@@ -1,7 +1,7 @@
-A simple blog(https://blog.thisishzr.me)
+[A simple blog]
 
 sleepy crud demo
 
-#TODOs
+# TODOs
 - [ ] use ORM?
 - [ ] use reflect?
