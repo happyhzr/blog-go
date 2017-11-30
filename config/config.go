@@ -1,13 +1,19 @@
 package config
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"os"
+	"strings"
+
+	"github.com/insisthzr/blog-back/utils"
 )
 
 type Config struct {
-	Http Http `json:"http"`
-	Db   Db   `json:"db"`
-	Jwt  Jwt  `json:"jwt"`
+	Debug bool `json:"debug"`
+	Http  Http `json:"http"`
+	Db    Db   `json:"db"`
+	Jwt   Jwt  `json:"jwt"`
 }
 
 type Http struct {
@@ -20,20 +26,21 @@ type Db struct {
 
 type Jwt struct {
 	Secret string `json:"secret"`
-	Exp    int64  `json:"exp"`
+	Maxage int64  `json:"maxage"`
 }
 
-var (
-	DefaultConfig = Config{
-		Http: Http{
-			Addr: ":20001",
-		},
-		Db: Db{
-			Dsn: "root:" + os.Getenv("MYSQL_PASS") + "@/blog?parseTime=true",
-		},
-		Jwt: Jwt{
-			Secret: "keyboard cat",
-			Exp:    24 * 60 * 60,
-		},
+var C *Config
+
+func Load(path string) {
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
 	}
-)
+	C = &Config{}
+	err = json.Unmarshal(b, C)
+	if err != nil {
+		panic(err)
+	}
+	C.Db.Dsn = strings.Replace(C.Db.Dsn, "{{password}}", os.Getenv("MYSQL_PASS"), -1)
+	utils.Sugar.Infow("load config", "config", C)
+}

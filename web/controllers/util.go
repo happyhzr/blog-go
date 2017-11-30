@@ -2,18 +2,19 @@ package controllers
 
 import (
 	"github.com/dgrijalva/jwt-go"
+
 	"github.com/insisthzr/blog-back/config"
+	"github.com/insisthzr/blog-back/models"
 )
 
-func getIDFromJWT(token *jwt.Token) int {
-	id := int(token.Claims.(jwt.MapClaims)["id"].(float64))
-	return id
+type offsetLimit struct {
+	Offset int `json:"offset"`
+	Limit  int `json:"limit"`
 }
 
-func newJwtToken(m jwt.MapClaims) string {
-	token := jwt.New(jwt.GetSigningMethod("HS256"))
-	token.Claims = m
-	tokenStr, err := token.SignedString([]byte(config.DefaultConfig.Jwt.Secret))
+func newJwtToken(u *models.User) string {
+	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &myClaims{User: u})
+	tokenStr, err := token.SignedString([]byte(config.C.Jwt.Secret))
 	if err != nil {
 		panic(err)
 	}

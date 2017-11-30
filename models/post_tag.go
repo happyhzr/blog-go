@@ -2,12 +2,14 @@ package models
 
 import (
 	"database/sql"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type PostTag struct {
-	ID     int64
-	PostID int64
-	TagID  int64
+	ID     int64 `db:"id"`
+	PostID int64 `db:"post_id"`
+	TagID  int64 `db:"tag_id"`
 }
 
 func (p *PostTag) Insert(tx sql.Tx) error {
@@ -24,16 +26,25 @@ func (p *PostTag) Insert(tx sql.Tx) error {
 	return nil
 }
 
+func listPostTagByPostID(id int64) ([]*PostTag, error) {
+	pts := []*PostTag{}
+	query := `SELECT id, post_id, tag_id FROM post_tag WHERE post_id = ?`
+	err := DB().Select(&pts, query, id)
+	return pts, err
+}
+
 type PostTags []*PostTag
 
-func (pts PostTags) Insert(tx *sql.Tx) error {
+func (pts PostTags) createTX(tx *sqlx.Tx) error {
 	query := "INSERT INTO post_tag(post_id, tag_id) VALUES "
 	vals := []interface{}{}
-	for _, pt := range pts {
-		query += "(?, ?),"
+	for i, pt := range pts {
+		if i != 0 {
+			query += ","
+		}
+		query += "(?, ?)"
 		vals = append(vals, pt.PostID, pt.TagID)
 	}
-	query = query[:len(query)-1]
 	_, err := tx.Exec(query, vals...)
 	return err
 }

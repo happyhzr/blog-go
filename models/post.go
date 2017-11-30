@@ -1,118 +1,206 @@
 package models
 
 import (
-	"time"
-
 	"database/sql"
-
-	"github.com/insisthzr/blog-back/utils"
+	"errors"
+	"time"
 )
 
-type PostSelector struct {
-	utils.LimitOffset
-	CID int64 `form:"cid"`
-}
-
 type Post struct {
-	ID        int64
-	Title     string
-	Content   string
-	CreatedAt time.Time
-	Author    User
-	Category  Category
+	ID         int64     `db:"id" json:"id"`
+	Title      string    `db:"title" json:"title"`
+	Content    string    `db:"content" json:"content"`
+	CreatedAt  int64     `db:"created_at" json:"created_at"`
+	UpdateAt   int64     `db:"updated_at" json:"updated_at"`
+	AuthorID   int64     `db:"author_id" json:"-"`
+	CategoryID int64     `db:"category_id" json:"-"`
+	Author     *User     `json:"author"`
+	Category   *Category `json:"category"`
+	Tags       []*Tag    `json:"tags"`
 }
 
-func (p *Post) Insert(tx *sql.Tx) error {
-	query := "INSERT INTO post(title, content, created_at, author_id, category_id) VALUES(?, ?, ?, ?, ?)"
-	res, err := tx.Exec(query, p.Title, p.Content, p.CreatedAt, p.Author.ID, p.Category.ID)
+func (p *Post) Create() error {
+	err := p.checkCreate()
 	if err != nil {
 		return err
 	}
-	id, err := res.LastInsertId()
+	return p.create()
+}
+
+func (p *Post) checkCreate() error {
+	var categoryID int64
+	if p.Category != nil {
+		categoryID = p.Category.ID
+	}
+	has, err := hasCategoryByID(categoryID)
 	if err != nil {
 		return err
 	}
-	p.ID = id
+	if !has {
+		return errors.New("category id not exist")
+	}
+
+	tagIDs := make([]int64, 0, len(p.Tags))
+	for _, t := range p.Tags {
+		tagIDs = append(tagIDs, t.ID)
+	}
+	has, err = hasTagByIDs(tagIDs)
+	if err != nil {
+		return err
+	}
+	if !has {
+		return errors.New("tag ids not exist")
+	}
 	return nil
 }
 
-func (p *Post) Update(tx *sql.Tx, id int64) error {
-	query := "UPDATE post SET title = ?, content = ? WHERE id = ?"
-	_, err := tx.Exec(query, p.Title, p.Content, id)
+func (p *Post) create() error {
+	var aID int64
+	if p.Author != nil {
+		aID = p.Author.ID
+	}
+	var cID int64
+	if p.Category != nil {
+		cID = p.Category.ID
+	}
+	t := time.Now().Unix()
+	p.CreatedAt = t
+	p.UpdateAt = t
+
+	query := `INSERT INTO post(title, content, author_id, category_id, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?)`
+	tx, err := DB().Beginx()
+	if err != nil {
+		return err
+	}
+	res, err := tx.Exec(query, p.Title, p.Content, aID, cID, p.CreatedAt, p.UpdateAt)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	p.ID, _ = res.LastInsertId()
+	if len(p.Tags) != 0 {
+		pts := make(PostTags, 0, len(p.Tags))
+		for _, t := range p.Tags {
+			pts = append(pts, &PostTag{PostID: p.ID, TagID: t.ID})
+		}
+		err = pts.createTX(tx)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (p *Post) Update() error {
+	err := p.checkUpdate()
+	if err != nil {
+		return err
+	}
+	return p.update()
+}
+
+func (p *Post) checkUpdate() error {
+	post, err := getPostByID(p.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("post not exist")
+		}
+		return err
+	}
+	if p.AuthorID != post.AuthorID {
+		return errors.New("author id not equal")
+	}
+	return nil
+}
+
+func (p *Post) update() error {
+	query := `UPDATE post SET title = ?, content = ?, updated_at = ? WHERE id = ?`
+	t := time.Now().Unix()
+	_, err := DB().Exec(query, p.Title, p.Content, t, p.ID)
 	return err
 }
 
-func getPost(tx *sql.Tx, query string, args ...interface{}) (*Post, error) {
-	p := &Post{}
-	authorName := sql.NullString{}
-	categoryName := sql.NullString{}
-	err := tx.QueryRow(query, args...).Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.Author.ID, &authorName, &p.Category.ID, &categoryName)
+func (p *Post) Delete() error {
+	err := p.checkDelete()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	p.Author.Name = authorName.String
-	p.Category.Name = categoryName.String
-	return p, err
+	return p.delete()
 }
 
-func GetPost(tx *sql.Tx, id int64) (*Post, error) {
-	query := `SELECT post.id, title, content, created_at, author_id, user.name, category_id, category.name 
-	 FROM post
-	 LEFT OUTER JOIN user ON author_id = user.id 
-	 LEFT OUTER JOIN category ON category_id = category.id
-     WHERE post.id = ?`
-	return getPost(tx, query, id)
-}
-
-func listPosts(tx *sql.Tx, query string, args ...interface{}) ([]*Post, error) {
-	posts := []*Post{}
-	rows, err := tx.Query(query, args...)
+func (p *Post) checkDelete() error {
+	post, err := getPostByID(p.ID)
 	if err != nil {
-		return posts, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		p := &Post{}
-		authorName := sql.NullString{}
-		categoryName := sql.NullString{}
-		err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.CreatedAt, &p.Author.ID, &authorName, &p.Category.ID, &categoryName)
-		if err != nil {
-			break
+		if err == sql.ErrNoRows {
+			return errors.New("post not exist")
 		}
-		p.Author.Name = authorName.String
-		p.Category.Name = categoryName.String
-		posts = append(posts, p)
+		return err
 	}
-	err = rows.Err()
-	if err != nil {
-		return posts, err
+	if p.AuthorID != post.AuthorID {
+		return errors.New("author id not equal")
+	}
+	return nil
+}
+
+func (p *Post) delete() error {
+	query := `DELETE FROM post WHERE id = ?`
+	_, err := DB().Exec(query, p.ID)
+	return err
+}
+
+func (p *Post) fillAssociation() error {
+	user, err := getUserByID(p.AuthorID)
+	if err == nil {
+		p.Author = user
+	} else if err != sql.ErrNoRows {
+		return err
+	}
+
+	category, err := GetCategoryByID(p.CategoryID)
+	if err == nil {
+		p.Category = category
+	} else if err != sql.ErrNoRows {
+		return err
+	}
+
+	tags, err := listTagByPostID(p.ID)
+	if err == nil {
+		p.Tags = tags
+	} else if err != sql.ErrNoRows {
+		return err
+	}
+
+	return nil
+}
+
+func ListPostWithRange(offset int, limit int) ([]*Post, error) {
+	posts := []*Post{}
+	query := `SELECT id, title, content, created_at, updated_at, author_id, category_id FROM post
+	 ORDER BY updated_at DESC LIMIT ? OFFSET ?`
+	err := DB().Select(&posts, query, limit, offset)
+	for _, p := range posts {
+		err = p.fillAssociation()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return posts, err
 }
 
-func ListPosts(tx *sql.Tx, s PostSelector) ([]*Post, error) {
-	ps := []*Post{}
-	var err error
-	if s.CID == 0 {
-		query := `SELECT post.id, title, content, created_at, author_id, user.name, category_id, category.name FROM post
-		 LEFT OUTER JOIN user ON author_id = user.id 
-		 LEFT OUTER JOIN category ON category_id = category.id
-		 ORDER BY post.id DESC LIMIT ? OFFSET ?`
-		ps, err = listPosts(tx, query, s.Limit, s.Offset)
-	} else {
-		query := `SELECT post.id, title, content, created_at, author_id, user.name, category_id, category.name FROM post
-		 LEFT OUTER JOIN user ON author_id = user.id 
-		 LEFT OUTER JOIN category ON category_id = category.id
-		 WHERE post.category_id = ?
-		 ORDER BY post.id DESC LIMIT ? OFFSET ?`
-		ps, err = listPosts(tx, query, s.CID, s.Limit, s.Offset)
+func GetPostByID(id int64) (*Post, error) {
+	post, err := getPostByID(id)
+	if err != nil {
+		return nil, err
 	}
-	return ps, err
+	err = post.fillAssociation()
+	return post, err
 }
 
-func DeletePost(tx *sql.Tx, id int64) error {
-	query := "DELETE from post WHERE id = ?"
-	_, err := tx.Exec(query, id)
-	return err
+func getPostByID(id int64) (*Post, error) {
+	post := &Post{}
+	query := `SELECT id, title, content, created_at, updated_at, author_id, category_id FROM post WHERE id = ? LIMIT 1`
+	err := DB().Get(post, query, id)
+	return post, err
 }

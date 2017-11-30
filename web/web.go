@@ -16,7 +16,7 @@ import (
 )
 
 func Start() {
-	//authMW := middlewares.JwtAuth(config.DefaultConfig.Jwt.Secret)
+	authMW := controllers.JwtAuth(config.C.Jwt.Secret)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -25,10 +25,6 @@ func Start() {
 
 	v1 := api.Group("/v1")
 	{
-		v1.GET("/ping", func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "pong"})
-			return
-		})
 		user := v1.Group("/users")
 		{
 			user.POST("/signup", controllers.Signup)
@@ -36,30 +32,30 @@ func Start() {
 		}
 		post := v1.Group("/posts")
 		{
-			post.GET("", controllers.ListPosts)
+			post.GET("", controllers.ListPost)
 			post.GET("/:id", controllers.GetPost)
-			post.POST("", controllers.CreatePost)
-			post.PATCH("/:id", controllers.UpdatePost)
-			post.DELETE("/:id", controllers.DeletePost)
+			post.POST("", authMW, controllers.CreatePost)
+			post.PATCH("/:id", authMW, controllers.UpdatePost)
+			post.DELETE("/:id", authMW, controllers.DeletePost)
 		}
 		tag := v1.Group("/tags")
 		{
-			tag.POST("", controllers.CreateTag)
-			tag.GET("", controllers.ListTags)
-			tag.PATCH("", nil)
-			tag.DELETE("", nil)
+			tag.POST("", authMW, controllers.CreateTag)
+			//tag.GET("", controllers.ListTags)
+			//tag.PATCH("", nil)
+			//tag.DELETE("", nil)
 		}
 		category := v1.Group("/categorys")
 		{
-			category.POST("", controllers.CreateCategory)
-			category.GET("", controllers.ListCategorys)
-			category.PATCH("", nil)
-			category.DELETE("", nil)
+			category.POST("", authMW, controllers.CreateCategory)
+			//category.GET("", controllers.ListCategorys)
+			//category.PATCH("", nil)
+			//category.DELETE("", nil)
 		}
 	}
 
 	srv := &http.Server{
-		Addr:    config.DefaultConfig.Http.Addr,
+		Addr:    config.C.Http.Addr,
 		Handler: r,
 	}
 

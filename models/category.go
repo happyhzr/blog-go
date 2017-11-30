@@ -2,6 +2,8 @@ package models
 
 import (
 	"database/sql"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type Category struct {
@@ -9,44 +11,37 @@ type Category struct {
 	Name string `json:"name"`
 }
 
-func (c *Category) Insert(tx *sql.Tx) error {
-	query := "INSERT INTO category(name) VALUES(?)"
-	res, err := tx.Exec(query, c.Name)
+func (c *Category) Create() error {
+	query := `INSERT INTO category(name) VALUES(?)`
+	res, err := DB().Exec(query, c.Name)
 	if err != nil {
 		return err
 	}
-	id, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-	c.ID = id
-	return err
+	c.ID, _ = res.LastInsertId()
+	return nil
 }
 
-func listCategorys(tx *sql.Tx, query string, args ...interface{}) ([]*Category, error) {
-	categorys := []*Category{}
-	rows, err := tx.Query(query, args...)
-	if err != nil {
-		return categorys, err
-	}
-	defer rows.Close()
+func GetCategoryByID(id int64) (*Category, error) {
+	query := `SELECT id, name FROM category WHERE id = ?`
+	category := &Category{}
+	err := DB().Get(category, query, id)
+	return category, err
+}
 
-	for rows.Next() {
-		c := &Category{}
-		err := rows.Scan(&c.ID, &c.Name)
-		if err != nil {
-			break
+func hasCategoryByID(id int64) (bool, error) {
+	_, err := GetCategoryByID(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
 		}
-		categorys = append(categorys, c)
+		return false, err
 	}
-	if rows.Err() != nil {
-		return categorys, err
-	}
-	return categorys, nil
+	return true, nil
 }
 
-func ListCategorys(tx *sql.Tx, limit int, offset int) ([]*Category, error) {
-	query := "SELECT id, name from category LIMIT ? OFFSET ?"
-	categorys, err := listCategorys(tx, query, limit, offset)
-	return categorys, err
+func getCategoryTX(tx *sqlx.Tx, id int64) (*Category, error) {
+	query := `SELECT id, name FROM category WHERE id = ?`
+	category := &Category{}
+	err := tx.Get(category, query, id)
+	return category, err
 }

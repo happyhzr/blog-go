@@ -1,0 +1,13 @@
+{
+  "debug":true,
+  "http":{
+    "addr":":50001"
+  },
+  "db":{
+    "dsn":"root:{{password}}@/blog?parseTime=true"
+  },
+  "jwt":{
+    "secret":"keyboard cat",
+    "maxage":604800
+  }
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/insisthzr/blog-back/config"
 	"github.com/insisthzr/blog-back/models"
 	"github.com/insisthzr/blog-back/utils"
 	"github.com/insisthzr/blog-back/web"
@@ -8,9 +9,7 @@ import (
 
 func main() {
 	utils.InitLogger()
-	utils.Sugar.Info("logger started")
+	config.Load("/mnt/code/blog/config.json")
 	models.Start()
-	utils.Sugar.Info("mysql started")
-	utils.Sugar.Info("web starting")
 	web.Start()
 }
