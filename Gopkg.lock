@@ -35,13 +35,13 @@
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
 
 [[projects]]
   branch = "master"
   name = "github.com/jmoiron/sqlx"
   packages = [".","reflectx"]
-  revision = "99f3ad6d85ae53d0fecf788ab62d0e9734b3c117"
+  revision = "05cef0741ade10ca668982355b3f3f0bcf0ff0a8"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -50,10 +50,10 @@
   version = "v0.0.3"
 
 [[projects]]
-  branch = "master"
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "14c9063c18427f21537bc9da3d15cfb0ed3c61c0"
+  revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
+  version = "v1.1"
 
 [[projects]]
   name = "go.uber.org/atomic"
@@ -77,7 +77,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "13fcbd661c8ececa8807a29b48407d674b1d8ed8"
+  revision = "03467258950d845cd1877eab69461b98e8c09219"
 
 [[projects]]
   name = "gopkg.in/go-playground/validator.v8"
@@ -89,11 +89,11 @@
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "287cf08546ab5e7e37d55a84f7ed3fd1db036de5"
+  revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0774889d88347e1f574b3b9afcb4fbc58dad20e875b487e9b8fae3395d2eba81"
+  inputs-digest = "db2fc7c3eba43cf8f958139d6cb033753cc78e9f9df0526b8983a89d54712c92"
   solver-name = "gps-cdcl"
   solver-version = 1
