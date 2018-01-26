@@ -13,10 +13,13 @@ type User struct {
 }
 
 func (u *User) Signup() error {
-	tx := DB().MustBegin()
+	tx, err := DB().Beginx()
+	if err != nil {
+		return err
+	}
 	user := User{}
 	query := `SELECT id, name, password FROM user WHERE name = ? LIMIT 1`
-	err := tx.Get(&user, query, u.Name)
+	err = tx.Get(&user, query, u.Name)
 	if err == nil {
 		tx.Rollback()
 		return errors.New("user exist")

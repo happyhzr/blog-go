@@ -1,13 +1,13 @@
 {
-  "debug":true,
-  "http":{
-    "addr":":50001"
+  "debug": true,
+  "http": {
+    "addr": ":8080"
   },
-  "db":{
-    "dsn":"root:{{password}}@/blog?parseTime=true"
+  "db": {
+    "dsn": "root:{{password}}@/blog?parseTime=true"
   },
-  "jwt":{
-    "secret":"keyboard cat",
-    "maxage":604800
+  "jwt": {
+    "secret": "keyboard cat",
+    "maxage": 604800
   }
 }
