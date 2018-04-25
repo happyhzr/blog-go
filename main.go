@@ -1,15 +1,13 @@
 package main
 
 import (
-	"github.com/insisthzr/blog-back/config"
-	"github.com/insisthzr/blog-back/models"
-	"github.com/insisthzr/blog-back/utils"
-	"github.com/insisthzr/blog-back/web"
+	"github.com/insisthzr/blog-back/api"
+	"github.com/insisthzr/blog-back/model"
+	"github.com/insisthzr/blog-back/tool/logger"
 )
 
 func main() {
-	utils.InitLogger()
-	config.Load("/mnt/code/blog/config.json")
-	models.Start()
-	web.Start()
+	logger.Init()
+	model.Start()
+	api.Start()
 }

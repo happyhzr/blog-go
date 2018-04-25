@@ -1,11 +1,11 @@
 FROM golang
 
-ADD . /go/src/github.com/insisthzr/blog-back
-
 WORKDIR /go/src/github.com/insisthzr/blog-back 
 
-RUN go build
+COPY . .
 
-ENTRYPOINT /go/src/github.com/insisthzr/blog-back/blog-back
+RUN go build -o blog
+
+ENTRYPOINT ./blog
 
 EXPOSE 8080
