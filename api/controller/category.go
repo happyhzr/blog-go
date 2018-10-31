@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/insisthzr/blog-back/model"
+	"github.com/insisthzr/blog-go/model"
 )
 
 func CreateCategory(c *gin.Context) {

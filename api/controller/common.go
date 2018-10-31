@@ -4,7 +4,8 @@ import (
 	"os"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/insisthzr/blog-back/model"
+
+	"github.com/insisthzr/blog-go/model"
 )
 
 type response struct {

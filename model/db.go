@@ -8,7 +8,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/insisthzr/blog-back/tool"
+	"github.com/insisthzr/blog-go/tool"
 )
 
 var (

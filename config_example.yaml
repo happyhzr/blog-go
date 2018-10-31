@@ -1,0 +1,8 @@
+port: 8080
+
+mysql:
+  dsn:  root:password@tcp(some-mysql:3306)/blog?charset=utf8&parseTime=True&loc=Local
+
+jwt:
+  secret: keyboard_cat
+  max_age:  604800

@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/insisthzr/blog-back/model"
+	"github.com/insisthzr/blog-go/model"
 )
 
 func GetPosts(c *gin.Context) {

@@ -1,2 +1,5 @@
 .vscode
-blog-back
+.idea
+blog-go
+config.yaml
+vendor

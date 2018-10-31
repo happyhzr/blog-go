@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/insisthzr/blog-back/api"
-	"github.com/insisthzr/blog-back/model"
-	"github.com/insisthzr/blog-back/tool/logger"
+	"github.com/insisthzr/blog-go/api"
+	"github.com/insisthzr/blog-go/model"
+	"github.com/insisthzr/blog-go/tool/logger"
 )
 
 func main() {

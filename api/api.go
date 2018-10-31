@@ -6,7 +6,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"github.com/insisthzr/blog-back/api/controller"
+	"github.com/insisthzr/blog-go/api/controller"
 )
 
 func Start() {
