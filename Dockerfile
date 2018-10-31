@@ -1,6 +1,6 @@
-FROM golang
+FROM golang:1.11
 
-WORKDIR /go/src/github.com/insisthzr/blog-back 
+WORKDIR /go/src/app
 
 COPY . .
 

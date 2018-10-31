@@ -1,1 +1,1 @@
-docker build -t blog .
+docker build -t happyhzr/blog .

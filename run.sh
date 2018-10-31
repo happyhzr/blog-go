@@ -1,7 +1,1 @@
-docker run \
--it \
---name=blog \
---env-file env.list \
--p=8000:8080 \
---rm \
-blog
+docker run -d --name=blog -p=8080:8080 --network blog happyhzr/blog
