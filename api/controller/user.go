@@ -18,6 +18,7 @@ func Signup(c *gin.Context) {
 		c.JSON(200, response{Code: 1, Message: err.Error()})
 		return
 	}
+	user.Password = ""
 	c.JSON(200, response{Code: 0, Data: user})
 }
 

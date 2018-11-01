@@ -1,12 +1,11 @@
 package model
 
 import (
-	"os"
 	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/jmoiron/sqlx"
+	"github.com/spf13/viper"
 
 	"github.com/insisthzr/blog-go/tool"
 )
@@ -17,7 +16,7 @@ var (
 
 func Start() {
 	var err error
-	db, err = gorm.Open("mysql", os.Getenv("dsn"))
+	db, err = gorm.Open("mysql", viper.GetString("mysql.dsn"))
 	tool.CheckError(err)
 
 	GetDB().AutoMigrate(&User{}, &Post{}, &Category{}, &Tag{})
@@ -26,13 +25,11 @@ func Start() {
 	db.DB().SetMaxOpenConns(100)
 	db.DB().SetConnMaxLifetime(time.Hour)
 
-	db.LogMode(true)
+	if viper.GetString("mode") != "prod" {
+		db.LogMode(true)
+	}
 }
 
 func GetDB() *gorm.DB {
 	return db
-}
-
-func DB() *sqlx.DB {
-	return nil
 }

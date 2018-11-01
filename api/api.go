@@ -1,15 +1,17 @@
 package api
 
 import (
-	"os"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 
 	"github.com/insisthzr/blog-go/api/controller"
 )
 
 func Start() {
+	if viper.GetString("mode")=="prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	r := gin.Default()
 	r.Use(cors.Default())
 	r.GET("/ping", func(c *gin.Context) {
@@ -50,5 +52,5 @@ func Start() {
 		}
 	}
 
-	r.Run(":" + os.Getenv("port"))
+	r.Run(":8080")
 }

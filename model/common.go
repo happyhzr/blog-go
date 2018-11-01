@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Model struct {
-	ID          int64      `gorm:"primary_key" json:"id"`
+	ID          int64      `json:"id"`
 	CreatedAt   time.Time  `json:"-"`
 	UpdatedAt   time.Time  `json:"-"`
 	DeletedAt   *time.Time `json:"-"`

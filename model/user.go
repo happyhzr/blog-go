@@ -21,9 +21,14 @@ func (u *User) AfterFind() (err error) {
 func (u *User) Signup() error {
 	exist := &User{}
 	tx := GetDB().Begin()
-	err := tx.Where("username = ?", u.Username).First(exist).Error
+	err := tx.Where("username = ?", u.Username).Take(exist).Error
 	if err != nil {
 		if err != gorm.ErrRecordNotFound {
+			tx.Rollback()
+			return err
+		}
+		err = tx.Create(u).Error
+		if err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -34,7 +39,7 @@ func (u *User) Signup() error {
 
 func (u *User) Login() error {
 	exist := &User{}
-	err := GetDB().Where("username = ?", u.Username).First(exist).Error
+	err := GetDB().Where("username = ?", u.Username).Take(exist).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return errors.New("user not exist")

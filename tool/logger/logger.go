@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -9,8 +10,13 @@ var (
 )
 
 func Init() {
+	var logger *zap.Logger
 	var err error
-	logger, err := zap.NewDevelopment()
+	if viper.GetString("mode") == "prod" {
+		logger, err = zap.NewProduction()
+	} else {
+		logger, err = zap.NewDevelopment()
+	}
 	if err != nil {
 		panic(err)
 	}

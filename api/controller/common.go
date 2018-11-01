@@ -1,11 +1,9 @@
 package controller
 
 import (
-	"os"
-
-	jwt "github.com/dgrijalva/jwt-go"
-
+	"github.com/dgrijalva/jwt-go"
 	"github.com/insisthzr/blog-go/model"
+	"github.com/spf13/viper"
 )
 
 type response struct {
@@ -31,7 +29,7 @@ func (c *config) setTotalPage(total int) {
 
 func newJwtToken(u *model.User) string {
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), &myClaims{User: u})
-	tokenStr, err := token.SignedString([]byte(os.Getenv("jwt_secret")))
+	tokenStr, err := token.SignedString([]byte(viper.GetString("jwt.secret")))
 	if err != nil {
 		panic(err)
 	}
