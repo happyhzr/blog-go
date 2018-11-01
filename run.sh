@@ -1,1 +1,1 @@
-docker run -d --name=blog -p=8080:8080 --network blog happyhzr/blog
+docker run -it --rm --name=blog -p=8081:8080 --network blog happyhzr/blog

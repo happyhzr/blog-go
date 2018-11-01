@@ -1,6 +1,6 @@
 FROM golang:1.11
 
-WORKDIR /go/src/app
+WORKDIR /go/src/github.com/insisthzr/blog-go
 
 COPY . .
 
